@@ -10,7 +10,7 @@ Aplicación web interna para registrar, asignar y gestionar **solicitudes de cot
 - **BD:** SQL Server (paquete `mssql`)
 - **Sesiones:** `express-session`
 - **Frontend:** Nunjucks + Bootstrap 5.3 + JavaScript
-- **Seguridad:** `helmet` (CSP desactivado en dev para permitir CDN)
+- **Seguridad:** `helmet` (CSP desactivado por ahora)
 
 ---
 
@@ -76,7 +76,9 @@ Ejecuta el script de esquema (tablas):
 - `SolicitudesHistorial`
 - `EstadosSolicitud` (catálogo de estados)
 
-### 3) Crear tabla de comentarios (si no existe)
+> Si no lo tienes en un solo archivo, ejecútalo según el orden en que lo hayas creado en el proyecto.
+
+### 3) Crear tabla de comentarios
 Ejecuta:
 
 ```sql
@@ -145,14 +147,7 @@ La app quedará en:
   - **Comentarios** tipo chat
 
 ### Auditoría (Historial)
-Cada cambio importante se registra en `SolicitudesHistorial` dentro de **la misma transacción** que el cambio principal.
-
-### Cambio de estado con justificación (obligatorio)
-- Cada cambio de estado **requiere** un texto de justificación (`comentario`).
-- La justificación se guarda:
-  1) como **comentario** (aparece en el chat), y  
-  2) como **historial** (`CHANGE_STATUS`) con before/after + justification.
-- Todo queda consistente en una **misma transacción** (si falla una parte, no se guarda nada).
+Cada cambio importante se registra en `SolicitudesHistorial` dentro de **la misma transacción** que el cambio de la solicitud.
 
 ### Exportación
 - Export CSV (solo JEFE/ADMIN):  
@@ -182,7 +177,7 @@ Cada cambio importante se registra en `SolicitudesHistorial` dentro de **la mism
 - `GET /solicitudes/:id/editar`
 - `POST /solicitudes/:id/editar`
 - `POST /solicitudes/:id/asignar` (JEFE/ADMIN)
-- `POST /solicitudes/:id/estado` (ANALISTA/JEFE/ADMIN) **(requiere comentario)**
+- `POST /solicitudes/:id/estado` (ANALISTA/JEFE/ADMIN)
 - `POST /solicitudes/:id/comentarios`
 - `GET /solicitudes/export.csv` (JEFE/ADMIN)
 
@@ -200,37 +195,18 @@ Cada cambio importante se registra en `SolicitudesHistorial` dentro de **la mism
 ## Notas importantes
 
 ### CSP (Helmet)
-En desarrollo se usa:
+Por ahora se usa:
 
 ```js
-helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false })
+helmet({ contentSecurityPolicy: false })
 ```
 
-Esto permite cargar Bootstrap desde CDN y ejecutar scripts inline del layout (toasts/validación).
-Si activas CSP estricto, debes permitir `cdn.jsdelivr.net` o mover scripts inline a archivos.
+Esto permite cargar Bootstrap desde CDN y ejecutar scripts inline del layout (toasts/validación).  
+Luego se puede endurecer CSP con nonces/hashes.
 
 ### Orden de rutas
 Las rutas fijas deben ir antes de rutas dinámicas. Ej:
 `/solicitudes/export.csv` debe ir **antes** de `/solicitudes/:id`.
-
----
-
-## Troubleshooting (rápido)
-
-### 1) “MIME type text/html” al cargar `/public/css/app.css`
-Significa que el archivo no existe o el static no está bien montado.
-- Debe existir: `public/css/app.css`
-- En `app.js` debe estar (antes de las rutas):
-```js
-app.use('/public', express.static(path.join(__dirname, '..', 'public')));
-```
-
-### 2) Errores CSP bloqueando Bootstrap CDN / scripts inline
-Asegura:
-```js
-app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-```
-y que NO haya otro `app.use(helmet())` duplicado en otro archivo.
 
 ---
 
@@ -254,14 +230,15 @@ views/
   pages/
 public/
   css/
-  js/
 ```
 
 ---
 
 ## Próximos pasos sugeridos
 
-- Endurecer CSP (allowlist CDN + nonce) o migrar a Bootstrap local (sin scripts inline)
+- Endurecer CSP (allowlist CDN + nonce)
 - Logs de administración (historial de cambios en Users)
 - Export Excel/PDF
 - Notificaciones por correo (flag `.env`)
+
+---

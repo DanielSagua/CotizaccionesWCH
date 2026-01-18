@@ -1,0 +1,7 @@
+mkdir public\vendor\bootstrap\css -Force
+mkdir public\vendor\bootstrap\js -Force
+
+copy node_modules\bootstrap\dist\css\bootstrap.min.css public\vendor\bootstrap\css\
+copy node_modules\bootstrap\dist\css\bootstrap.min.css.map public\vendor\bootstrap\css\
+copy node_modules\bootstrap\dist\js\bootstrap.bundle.min.js public\vendor\bootstrap\js\
+copy node_modules\bootstrap\dist\js\bootstrap.bundle.min.js.map public\vendor\bootstrap\js\

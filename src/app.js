@@ -11,25 +11,28 @@ const adminUsersRoutes = require('./modules/admin/users.routes');
 
 const app = express();
 
-// 1) Helmet SIN CSP (para permitir CDN + scripts inline del layout)
-app.use(helmet({ contentSecurityPolicy: false }));
+// Helmet SIN CSP (permite CDN + inline scripts)
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+
+// Por si algún middleware/proxy deja CSP seteado
+app.use((req, res, next) => {
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('Content-Security-Policy-Report-Only');
+    next();
+});
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// 2) Session ANTES de cualquier ruta protegida
+// Session ANTES de rutas protegidas
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production'
-    }
+    cookie: { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' }
 }));
 
-// 3) Flash + user global (después de session)
+// Flash + user global
 app.use((req, res, next) => {
     res.locals.user = req.session?.user || null;
     res.locals.flash = req.session?.flash || null;
@@ -37,7 +40,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// 4) Nunjucks
+// Nunjucks (si tu carpeta views está en la raíz del proyecto)
 const njkEnv = nunjucks.configure(path.join(__dirname, '..', 'views'), {
     autoescape: true,
     express: app
@@ -50,18 +53,15 @@ njkEnv.addFilter('fmtDT', (value) => {
 
     return new Intl.DateTimeFormat('es-CL', {
         timeZone: 'America/Sao_Paulo',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
     }).format(d);
 });
 
-// 5) Static SIEMPRE antes de rutas (para que /public no redirija a login)
+// Static ANTES de rutas
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
-// 6) Rutas (después de session + static)
+// Rutas
 app.use(authRoutes);
 app.use(solicitudesRoutes);
 app.use(adminUsersRoutes);

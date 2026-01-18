@@ -1,0 +1,93 @@
+/* =========================================================
+   Cotizaciones App - estilos base
+   Archivo: /public/css/app.css
+========================================================= */
+
+:root {
+    --app-radius: 14px;
+}
+
+/* Mejoras generales */
+body {
+    padding-bottom: 32px;
+}
+
+/* Cards un poco más “pro” */
+.card {
+    border-radius: var(--app-radius);
+}
+
+.card.shadow-sm {
+    box-shadow: 0 .25rem .9rem rgba(0, 0, 0, .06) !important;
+}
+
+/* Links de tablas */
+.table a {
+    text-decoration: none;
+}
+
+.table a:hover {
+    text-decoration: underline;
+}
+
+/* Badge más compacto */
+.badge {
+    font-weight: 600;
+}
+
+/* Textareas: mejor legibilidad */
+textarea {
+    resize: vertical;
+}
+
+/* Pequeños ajustes en navbar */
+.navbar .navbar-brand {
+    letter-spacing: .2px;
+}
+
+/* Espaciado en paginación */
+.pagination {
+    gap: 4px;
+}
+
+/* ===== Comentarios tipo “chat” ===== */
+.chat-item {
+    padding: .5rem 0;
+}
+
+.chat-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.chat-author {
+    font-weight: 600;
+}
+
+.chat-role {
+    font-weight: 400;
+    opacity: .7;
+}
+
+.chat-time {
+    opacity: .7;
+    font-size: .85rem;
+    white-space: nowrap;
+}
+
+.chat-text {
+    white-space: pre-wrap;
+}
+
+/* ===== Pequeñas mejoras de formularios ===== */
+.form-text {
+    opacity: .85;
+}
+
+/* Evita que los inputs disabled se vean “apagados” demasiado */
+.form-control:disabled,
+.form-select:disabled {
+    opacity: 1;
+    background-color: #f8f9fa;
+}

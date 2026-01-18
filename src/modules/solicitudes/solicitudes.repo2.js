@@ -545,19 +545,6 @@ async function getDetalle(scope, id_solicitud, paging = {}) {
   };
 }
 
-// Wrapper para mantener compatibilidad: cambio de estado exige justificación (comentario)
-async function changeEstadoWithHistory({ id_solicitud, id_estado, actorUserId, meta, comentario }) {
-  if (!comentario || !comentario.trim()) throw new Error('Justificación requerida para cambio de estado');
-
-  return changeEstadoWithHistoryAndComment({
-    id_solicitud,
-    id_estado,
-    actorUserId,
-    comentario: comentario.trim(),
-    meta
-  });
-}
-
 
 module.exports = {
   list,

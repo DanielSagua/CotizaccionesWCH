@@ -199,19 +199,23 @@ async function assign(req, res) {
 
 async function changeStatus(req, res) {
     const user = req.session.user;
-    const id = Number(req.params.id);
+    const id_solicitud = Number(req.params.id);
+    const id_estado = Number(req.body.id_estado);
+    const comentario = (req.body.comentario || '').trim();
 
     try {
-        const id_estado = Number(req.body.id_estado);
-        await service.changeEstado(user, id, id_estado, req);
+        if (!comentario) throw new Error('Debes ingresar una justificación para el cambio de estado.');
+
+        await service.changeEstado(user, id_solicitud, id_estado, comentario, req);
 
         req.session.flash = { type: 'success', message: 'Estado actualizado' };
-        return res.redirect(`/solicitudes/${id}`);
+        return res.redirect(`/solicitudes/${id_solicitud}`);
     } catch (e) {
-        console.error(e);
-        return res.status(400).send(e.message || 'No se pudo cambiar estado');
+        req.session.flash = { type: 'danger', message: e.message || 'No se pudo cambiar el estado' };
+        return res.redirect(`/solicitudes/${id_solicitud}`);
     }
 }
+
 
 async function addComment(req, res) {
     const user = req.session.user;
