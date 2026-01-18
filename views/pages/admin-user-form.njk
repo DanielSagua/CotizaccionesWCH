@@ -1,0 +1,75 @@
+{% extends "layouts/main.njk" %}
+{% set title = "Nuevo Usuario" if mode == "new" else "Editar Usuario" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-0">{{ title }}</h1>
+    <div class="text-muted small">Administración</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="/admin/users">Volver</a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {% if error %}
+      <div class="alert alert-danger py-2">{{ error }}</div>
+    {% endif %}
+
+    <form method="post"
+          action="{% if mode == 'new' %}/admin/users{% else %}/admin/users/{{ form.id_user }}/editar{% endif %}"
+          class="row g-3 needs-validation" novalidate autocomplete="off">
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Username</label>
+        <input class="form-control" name="username" value="{{ form.username }}" {% if mode=='edit' %}disabled{% endif %}
+               required minlength="3" maxlength="50">
+        <div class="form-text">Solo letras/números . _ -</div>
+        <div class="invalid-feedback">Username inválido.</div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Rol</label>
+        <select class="form-select" name="rol" required>
+          {% for r in ["VENDEDOR","JEFE","ANALISTA","ADMIN"] %}
+            <option value="{{ r }}" {% if form.rol == r %}selected{% endif %}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Nombre</label>
+        <input class="form-control" name="nombre" value="{{ form.nombre }}" required maxlength="120">
+        <div class="invalid-feedback">Nombre requerido.</div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Correo</label>
+        <input class="form-control" name="correo" value="{{ form.correo }}" maxlength="150">
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">Estado</label>
+        <select class="form-select" name="estado">
+          <option value="1" {% if form.estado == 1 %}selected{% endif %}>Activo</option>
+          <option value="0" {% if form.estado == 0 %}selected{% endif %}>Inactivo</option>
+        </select>
+      </div>
+
+      {% if mode == 'new' %}
+      <div class="col-12 col-md-9">
+        <label class="form-label">Password inicial</label>
+        <input class="form-control" name="password" type="password" minlength="8" required placeholder="Min 8 caracteres">
+        <div class="invalid-feedback">Password requerido (min 8).</div>
+      </div>
+      {% endif %}
+
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary">Guardar</button>
+        <a class="btn btn-outline-secondary" href="/admin/users">Cancelar</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

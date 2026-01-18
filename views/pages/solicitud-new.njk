@@ -1,0 +1,67 @@
+{% extends "layouts/main.njk" %}
+{% set title = "Nueva Solicitud" %}
+
+{% block content %}
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-0">Nueva Solicitud</h1>
+    <div class="text-muted small">Completa los datos para crear una solicitud</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="/solicitudes">Volver</a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {% if error %}
+      <div class="alert alert-danger py-2">{{ error }}</div>
+    {% endif %}
+
+<form method="post" action="/solicitudes" class="row g-3 needs-validation" novalidate autocomplete="off">
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Cliente *</label>
+        <input class="form-control" name="cliente" required maxlength="150" value="{{ form.cliente }}">
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Deadline</label>
+        <input class="form-control" type="datetime-local" name="deadline" value="{{ form.deadline }}">
+        <div class="form-text">Se guardará en UTC (v1)</div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Asunto *</label>
+        <input class="form-control" name="asunto" required maxlength="200" value="{{ form.asunto }}">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Detalle</label>
+        <textarea class="form-control" name="detalle" rows="5">{{ form.detalle }}</textarea>
+      </div>
+
+      <input type="hidden" name="deadline_utc_iso" id="deadline_utc_iso">
+
+
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary">Crear</button>
+        <a class="btn btn-outline-secondary" href="/solicitudes">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+<script>
+  (function(){
+    const form = document.querySelector('form[action="/solicitudes"]');
+    if (!form) return;
+
+    const inputLocal = form.querySelector('input[name="deadline"]');
+    const hiddenUtc  = document.getElementById('deadline_utc_iso');
+
+    form.addEventListener('submit', () => {
+      if (!inputLocal || !hiddenUtc) return;
+      if (!inputLocal.value) { hiddenUtc.value = ''; return; }
+      hiddenUtc.value = new Date(inputLocal.value).toISOString(); // UTC real del cliente
+    });
+  })();
+</script>

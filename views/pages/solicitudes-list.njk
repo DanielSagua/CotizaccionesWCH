@@ -1,0 +1,129 @@
+{% extends "layouts/main.njk" %}
+{% set title = "Solicitudes" %}
+{% if user.rol in ["JEFE","ADMIN"] %}
+  <a class="btn btn-outline-success btn-sm"
+     href="/solicitudes/export.csv?{{ ('tab=' ~ tab ~ '&cliente=' ~ (filtros.cliente or '') ~ '&asunto=' ~ (filtros.asunto or '') ~ '&id_estado=' ~ (filtros.id_estado or '') ~ '&assigned_user_id=' ~ (filtros.assigned_user_id or '')) | safe }}">
+    Exportar CSV
+  </a>
+{% endif %}
+
+{% block content %}
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-0">Solicitudes</h1>
+    <div class="text-muted small">Total: {{ total }}</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-pills mb-3">
+  {% for t in tabs %}
+    <li class="nav-item">
+      <a class="nav-link {% if t.active %}active{% endif %}" href="/solicitudes?tab={{ t.key }}&pageSize={{ pageSize }}">{{ t.label }}</a>
+    </li>
+  {% endfor %}
+</ul>
+
+<form class="card card-body mb-3" method="get" action="/solicitudes">
+  <input type="hidden" name="tab" value="{{ tab }}">
+  <div class="row g-2">
+
+    <div class="col-12 col-md-3">
+      <input class="form-control" name="cliente" placeholder="Cliente" value="{{ filtros.cliente or '' }}">
+    </div>
+
+    <div class="col-12 col-md-3">
+      <input class="form-control" name="asunto" placeholder="Asunto" value="{{ filtros.asunto or '' }}">
+    </div>
+
+    <div class="col-12 col-md-2">
+      <select class="form-select" name="id_estado">
+        <option value="">Estado (todos)</option>
+        {% for e in estados %}
+          <option value="{{ e.id_estado }}" {% if filtros.id_estado == (e.id_estado|string) %}selected{% endif %}>{{ e.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-2">
+      {% if user.rol in ["JEFE","ADMIN"] %}
+        <select class="form-select" name="assigned_user_id">
+          <option value="">Asignado (todos)</option>
+          {% for a in analistas %}
+            <option value="{{ a.id_user }}" {% if filtros.assigned_user_id == (a.id_user|string) %}selected{% endif %}>{{ a.nombre }}</option>
+          {% endfor %}
+        </select>
+      {% else %}
+        <div class="form-control bg-light text-muted">Asignado (solo jefe/admin)</div>
+      {% endif %}
+    </div>
+
+    <div class="col-12 col-md-2">
+      <select class="form-select" name="pageSize">
+        {% for s in [10,20,50,100] %}
+          <option value="{{ s }}" {% if pageSize == s %}selected{% endif %}>{{ s }} / pág</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+      <button class="btn btn-primary">Filtrar</button>
+      <a class="btn btn-outline-secondary" href="/solicitudes?tab={{ tab }}&pageSize={{ pageSize }}">Limpiar</a>
+    </div>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Asunto</th>
+          <th>Estado</th>
+          <th>Owner</th>
+          <th>Asignado</th>
+          <th>Creación</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td><a href="/solicitudes/{{ r.id_solicitud }}" class="link-primary text-decoration-none">{{ r.id_solicitud }}</a></td>
+            <td>{{ r.cliente }}</td>
+            <td>{{ r.asunto }}</td>
+            <td>{{ r.estado }}</td>
+            <td>{{ r.owner_nombre }}</td>
+            <td>{{ r.assigned_nombre or '-' }}</td>
+            <td class="text-muted small">{{ r.created_at_utc | fmtDT }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7" class="text-center text-muted py-4">Sin resultados</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Paginación -->
+{% if totalPages > 1 %}
+<nav class="mt-3">
+  <ul class="pagination mb-0">
+    <li class="page-item {% if not pager.prevUrl %}disabled{% endif %}">
+      <a class="page-link" href="{{ pager.prevUrl or '#' }}">Anterior</a>
+    </li>
+
+    {% for p in pager.pages %}
+      <li class="page-item {% if p.active %}active{% endif %}">
+        <a class="page-link" href="{{ p.url }}">{{ p.n }}</a>
+      </li>
+    {% endfor %}
+
+    <li class="page-item {% if not pager.nextUrl %}disabled{% endif %}">
+      <a class="page-link" href="{{ pager.nextUrl or '#' }}">Siguiente</a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

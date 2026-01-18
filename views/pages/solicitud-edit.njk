@@ -1,0 +1,83 @@
+{% extends "layouts/main.njk" %}
+{% set title = "Editar Solicitud #" ~ solicitud.id_solicitud %}
+
+{% block content %}
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-0">Editar Solicitud #{{ solicitud.id_solicitud }}</h1>
+    <div class="text-muted small">{{ solicitud.cliente }} · {{ solicitud.estado }}</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="/solicitudes/{{ solicitud.id_solicitud }}">Volver</a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {% if error %}
+      <div class="alert alert-danger py-2">{{ error }}</div>
+    {% endif %}
+
+<form method="post" action="/solicitudes/{{ solicitud.id_solicitud }}/editar" class="row g-3 needs-validation" novalidate autocomplete="off">
+      <input type="hidden" name="deadline_utc_iso" id="deadline_utc_iso">
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Cliente</label>
+<input class="form-control" name="cliente" maxlength="150" value="{{ solicitud.cliente }}"
+  {% if not editPolicy.cliente %}disabled{% endif %} required>
+
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Deadline</label>
+<input class="form-control" type="datetime-local" name="deadline" id="deadlineLocal"
+  {% if not editPolicy.deadline %}disabled{% endif %}>
+        <div class="form-text">Se guardará en UTC</div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Asunto</label>
+<input class="form-control" name="asunto" maxlength="200" value="{{ solicitud.asunto }}"
+  {% if not editPolicy.asunto %}disabled{% endif %} required>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Detalle</label>
+<textarea class="form-control" name="detalle" rows="6"
+  {% if not editPolicy.detalle %}disabled{% endif %}>{{ solicitud.detalle or '' }}</textarea>
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <button class="btn btn-primary">Guardar</button>
+        <a class="btn btn-outline-secondary" href="/solicitudes/{{ solicitud.id_solicitud }}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const form = document.querySelector('form');
+    const inputLocal = document.getElementById('deadlineLocal');
+    const hiddenUtc  = document.getElementById('deadline_utc_iso');
+
+    // set inicial desde UTC si existe
+    const utc = {{ (solicitud.deadline_utc ? ('"' ~ solicitud.deadline_utc ~ '"') : 'null') | safe }};
+    if (utc && inputLocal) {
+      const d = new Date(utc);
+      // convertir a formato datetime-local (local del browser)
+      const pad = (n) => String(n).padStart(2,'0');
+      const y = d.getFullYear();
+      const m = pad(d.getMonth()+1);
+      const da = pad(d.getDate());
+      const h = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      inputLocal.value = `${y}-${m}-${da}T${h}:${mi}`;
+    }
+
+    form.addEventListener('submit', () => {
+      if (!inputLocal || !hiddenUtc) return;
+      if (!inputLocal.value) { hiddenUtc.value = ''; return; }
+      hiddenUtc.value = new Date(inputLocal.value).toISOString();
+    });
+  })();
+</script>
+{% endblock %}

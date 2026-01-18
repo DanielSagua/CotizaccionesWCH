@@ -1,0 +1,30 @@
+{% extends "layouts/main.njk" %}
+{% set title = "Login - Cotizaciones" %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-5 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h5 mb-3">Iniciar sesión</h1>
+
+        {% if error %}
+          <div class="alert alert-danger py-2">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/login" autocomplete="off">
+          <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <input class="form-control" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input class="form-control" name="password" type="password" required>
+          </div>
+          <button class="btn btn-primary w-100">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

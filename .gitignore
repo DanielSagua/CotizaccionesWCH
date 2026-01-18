@@ -1,0 +1,52 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build / dist
+dist/
+build/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Cache
+.cache/
+*.cache
+
+# Optional: local uploads (if you add file uploads later)
+uploads/
+public/uploads/
+
+# SQL Server local artifacts / backups (optional)
+*.bak
+*.mdf
+*.ldf
+
+# Temp
+tmp/
+temp/
