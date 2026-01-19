@@ -558,6 +558,43 @@ async function changeEstadoWithHistory({ id_solicitud, id_estado, actorUserId, m
   });
 }
 
+async function listForExport(scope, filtros) {
+  const pool = await getPool();
+
+  const cliente = (filtros.cliente || '').trim();
+  const asunto = (filtros.asunto || '').trim();
+
+  let where = `WHERE 1=1 `;
+  if (cliente) where += ` AND s.cliente LIKE '%' + @cliente + '%'`;
+  if (asunto) where += ` AND s.asunto  LIKE '%' + @asunto  + '%'`;
+
+  if (scope.mode === 'OWNER') where += ` AND s.owner_user_id = @scopeUser`;
+  if (scope.mode === 'ASSIGNED') where += ` AND s.assigned_user_id = @scopeUser`;
+
+  const req = pool.request();
+  if (cliente) req.input('cliente', sql.NVarChar, cliente);
+  if (asunto) req.input('asunto', sql.NVarChar, asunto);
+  if (scope.mode !== 'ALL') req.input('scopeUser', sql.Int, scope.id_user);
+
+  const q = `
+    SELECT
+      s.id_solicitud, s.cliente, s.asunto, s.deadline_utc, s.created_at_utc,
+      e.nombre AS estado,
+      ou.nombre AS owner_nombre,
+      au.nombre AS assigned_nombre
+    FROM dbo.Solicitudes s
+    INNER JOIN dbo.EstadosSolicitud e ON e.id_estado = s.id_estado
+    INNER JOIN dbo.Users ou ON ou.id_user = s.owner_user_id
+    LEFT  JOIN dbo.Users au ON au.id_user = s.assigned_user_id
+    ${where}
+    ORDER BY s.created_at_utc DESC
+  `;
+
+  const r = await req.query(q);
+  return { rows: r.recordset };
+}
+
+
 
 module.exports = {
   list,
@@ -569,5 +606,6 @@ module.exports = {
   changeEstadoWithHistory,
   addCommentWithHistory,
   getDetalle,
-  changeEstadoWithHistoryAndComment
+  changeEstadoWithHistoryAndComment,
+  listForExport
 };

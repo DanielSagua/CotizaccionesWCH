@@ -19,7 +19,15 @@ router.post('/solicitudes/:id/estado', requireAuth, requireAnyRole(['ANALISTA', 
 // 👇 comentarios (cualquiera que pueda ver la solicitud)
 router.post('/solicitudes/:id/comentarios', requireAuth, controller.addComment);
 
-router.get('/solicitudes/export.csv', requireAuth, requireAnyRole(['JEFE','ADMIN']), controller.exportCsv);
+router.get('/solicitudes/export.csv', requireAuth, requireAnyRole(['JEFE', 'ADMIN']), controller.exportCsv);
+
+router.get(
+    '/solicitudes/export.xlsx',
+    requireAuth,
+    requireAnyRole(['JEFE', 'ADMIN']),
+    controller.exportXlsx
+);
+
 
 router.get('/solicitudes/:id', requireAuth, controller.detail);
 

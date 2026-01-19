@@ -1,26 +1,18 @@
 {% extends "layouts/main.njk" %}
 {% set title = "Solicitudes" %}
+{% if user.rol in ["JEFE","ADMIN"] %}
+  <a class="btn btn-outline-success btn-sm"
+     href="/solicitudes/export.csv?{{ ('tab=' ~ tab ~ '&cliente=' ~ (filtros.cliente or '') ~ '&asunto=' ~ (filtros.asunto or '') ~ '&id_estado=' ~ (filtros.id_estado or '') ~ '&assigned_user_id=' ~ (filtros.assigned_user_id or '')) | safe }}">
+    Exportar CSV
+  </a>
+{% endif %}
 
 {% block content %}
-{# QueryString para export (mantiene filtros/tab) #}
-{% set qs = ('tab=' ~ tab ~ '&cliente=' ~ (filtros.cliente or '') ~ '&asunto=' ~ (filtros.asunto or '') ~ '&id_estado=' ~ (filtros.id_estado or '') ~ '&assigned_user_id=' ~ (filtros.assigned_user_id or '')) %}
-
 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
   <div>
     <h1 class="h4 mb-0">Solicitudes</h1>
     <div class="text-muted small">Total: {{ total }}</div>
   </div>
-
-  {% if user and (user.rol in ["JEFE","ADMIN"]) %}
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-secondary btn-sm" href="/solicitudes/export.csv?{{ qs | safe }}">
-        Exportar CSV
-      </a>
-      <a class="btn btn-outline-success btn-sm" href="/solicitudes/export.xlsx?{{ qs | safe }}">
-        Exportar Excel
-      </a>
-    </div>
-  {% endif %}
 </div>
 
 <!-- Tabs -->

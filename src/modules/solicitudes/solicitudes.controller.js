@@ -245,6 +245,19 @@ async function exportCsv(req, res) {
     res.end(csv);
 }
 
+async function exportXlsx(req, res) {
+    const user = req.session.user;
+    const filtros = { ...req.query, pageSize: 5000, page: 1 }; // límite razonable
+
+    const buffer = await service.exportSolicitudesXlsx(user, filtros);
+
+    res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader('Content-Disposition', 'attachment; filename="solicitudes.xlsx"');
+    res.end(buffer);
+}
 
 
-module.exports = { list, viewNew, create, detail, viewEdit, update, assign, changeStatus, addComment, exportCsv };
+module.exports = { list, viewNew, create, detail, viewEdit, update, assign, changeStatus, addComment, exportCsv, exportXlsx };

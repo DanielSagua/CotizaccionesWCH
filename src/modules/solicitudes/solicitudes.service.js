@@ -1,4 +1,44 @@
 const repo = require('./solicitudes.repo');
+const ExcelJS = require('exceljs');
+
+async function exportSolicitudesXlsx(user, filtros) {
+    const { scope, onlyAssigned } = buildScope(user, filtros?.tab);
+
+    const data = await repo.listForExport(scope, filtros);
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Solicitudes');
+
+    ws.columns = [
+        { header: 'ID', key: 'id_solicitud', width: 10 },
+        { header: 'Cliente', key: 'cliente', width: 30 },
+        { header: 'Asunto', key: 'asunto', width: 40 },
+        { header: 'Estado', key: 'estado', width: 18 },
+        { header: 'Owner', key: 'owner_nombre', width: 22 },
+        { header: 'Asignado', key: 'assigned_nombre', width: 22 },
+        { header: 'Creación (UTC)', key: 'created_at_utc', width: 22 },
+        { header: 'Deadline (UTC)', key: 'deadline_utc', width: 22 }
+    ];
+
+    ws.getRow(1).font = { bold: true };
+
+    for (const r of data.rows) {
+        ws.addRow({
+            id_solicitud: r.id_solicitud,
+            cliente: r.cliente,
+            asunto: r.asunto,
+            estado: r.estado,
+            owner_nombre: r.owner_nombre,
+            assigned_nombre: r.assigned_nombre || '',
+            created_at_utc: r.created_at_utc,
+            deadline_utc: r.deadline_utc || ''
+        });
+    }
+
+    return wb.xlsx.writeBuffer();
+}
+
+
 
 function getMeta(req) {
     return {
@@ -43,6 +83,12 @@ function resolveTab(user, tab) {
 
     return { resolved, allowed };
 }
+
+function buildScope(user, tab) {
+    const { resolved: tabResolved } = resolveTab(user, tab);
+    return tabToScopeAndFlags(user, tabResolved); // retorna { scope, onlyAssigned }
+}
+
 
 function tabToScopeAndFlags(user, tabResolved) {
     const rol = user.rol;
@@ -324,5 +370,6 @@ module.exports = {
     assignAnalista,
     changeEstado,
     addComentario,
-    exportSolicitudesCsv
+    exportSolicitudesCsv,
+    exportSolicitudesXlsx
 };
